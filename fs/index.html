@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+
+    <title>HTTP gzip</title>
+    <!-- Bootstrap CSS -->
+    <link href="bootstrap.min.css.gz" type="text/css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="container">
+      <table class="table" id='files'>
+        <thead>
+        <th>Files</th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="jquery-3.3.1.slim.min.js.gz"></script>
+    <script src="popper.min.js.gz"></script>
+    <script src="bootstrap.min.js.gz"></script>
+    <script type="text/javascript">
+      let serverUrlRegex = /\d+\.\d+\.\d+\.\d+/; //  Matches 192.168.1.8 etc.
+      let currentUrl = window.location.origin; //  Get the URL from the browser.
+      let serverUrl = currentUrl.match(serverUrlRegex); //  Extract what is needed to create WebSocket.
+      var wsUri = 'ws://' + serverUrl[0] + '/rpc/';
+
+      function wsListFiles() {
+        let ws = new WebSocket(wsUri);
+        let method = 'FS.List';
+        ws.onopen = function (evt) {
+          ws.send(JSON.stringify({
+            "id": parseInt(Date.now() / 1000000, 10),
+            "src": "browser",
+            "method": method,
+          }));
+        }
+        ws.onerror = function (evt) {
+        }
+        ws.onmessage = function (evt) {
+          let error = JSON.parse(evt.data).error;
+          let result = JSON.parse(evt.data).result;
+          if (undefined !== error) {
+            let errorMessage = JSON.stringify((error));
+            console.log("Error: ", errorMessage);
+            let line = '<tr><td>' + errorMessage + '</td></tr>';
+            $('#files tbody').append(line);
+            return;
+          } else if (undefined !== result) {
+            for (let file of result) {
+              if (file !== null) {
+                let line = '<tr><td>' + file + '</td></tr>';
+                $('#files tbody').append(line);
+              }
+            }
+          }
+          ws.close();
+        };
+      }
+
+      $(document).ready(wsListFiles);
+    </script>
+  </body>
+
+</html>
