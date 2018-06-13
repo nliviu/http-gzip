@@ -30,10 +30,17 @@
     <script src="popper.min.js.gz"></script>
     <script src="bootstrap.min.js.gz"></script>
     <script type="text/javascript">
-      let serverUrlRegex = /\d+\.\d+\.\d+\.\d+/; //  Matches 192.168.1.8 etc.
       let currentUrl = window.location.origin; //  Get the URL from the browser.
-      let serverUrl = currentUrl.match(serverUrlRegex); //  Extract what is needed to create WebSocket.
-      var wsUri = 'ws://' + serverUrl[0] + '/rpc/';
+      let serverIpRegex = /\d+\.\d+\.\d+\.\d+/; //  Matches 192.168.1.8 etc.
+      let serverUrl = currentUrl.match(serverIpRegex);
+      console.log('serverIp=' + serverUrl);
+      if (null === serverUrl) {
+        let serverUrlRegex = /([a-z]+\:\/+)([^\/\s]*)([a-z0-9\-@\^=%&;\/~\+]*)[\?]?([^ \#]*)#?([^ \#]*)/i;
+        serverUrl = currentUrl.match(serverUrlRegex);
+        serverUrl = serverUrl[2];
+        console.log('serverUrl=' + serverUrl);
+      }
+      var wsUri = 'ws://' + serverUrl + '/rpc/';
 
       function wsListFiles() {
         let ws = new WebSocket(wsUri);
