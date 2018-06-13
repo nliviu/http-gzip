@@ -50,7 +50,7 @@ static void root_handler(struct mg_connection *nc, int ev, void *p, void *user_d
 
 enum mgos_app_init_result mgos_app_init(void) {
   memset(&s_http_server_opts, 0, sizeof (s_http_server_opts));
-  s_http_server_opts.document_root = ".";
+  s_http_server_opts.document_root = mgos_sys_config_get_http_document_root();
   /*
    * add mime types for css.gz and js.gz
    */
